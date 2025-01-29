@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Brewery Monitor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+</head>
+
+<body>
+    <div style="box-sizing: border-box;width: 50%; height: 50%;">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        let chartData = {
+            pressure: 0,
+            temperature: 0,
+            flow: 0
+        };
+        function setupWebSocket(url, elementId) {
+            const ws = new WebSocket(url);
+            ws.onmessage = function (event) {
+                chartData[elementId] = event.data;
+                updateChart();
+                console.log(chartData)
+            };
+        }
+
+        setupWebSocket('ws://localhost:8080/ws/pressure', 'pressure');
+        setupWebSocket('ws://localhost:8080/ws/temperature', 'temperature');
+        setupWebSocket('ws://localhost:8080/ws/flow', 'flow');
+        const ctx = document.getElementById('myChart').getContext('2d');
+        let barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [['Pressure', 'Temperature', 'Flow']],
+                datasets: [
+                    {
+                        label: 'Pressure',
+                        data: [],
+                        backgroundColor: 'rgb(255, 57, 71)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Temperature',
+                        data: [],
+                        backgroundColor: 'rgba(54, 152, 235)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Flow',
+                        data: [],
+                        backgroundColor: 'rgba(75, 192, 12)',
+                        borderWidth: 2
+                    }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Real-Time Brewery (Click below to hide a specific bar)'
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                    }
+                }
+            },
+
+        });
+        function updateChart() {
+            barChart.data.datasets[0].data = [chartData.pressure];
+            barChart.data.datasets[1].data = [chartData.temperature];
+            barChart.data.datasets[2].data = [chartData.flow];
+            barChart.update();
+        }
+
+    </script>
+</body>
+
+</html>
