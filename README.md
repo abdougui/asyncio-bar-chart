@@ -13,7 +13,7 @@ A WebSocket server using `aiohttp` to stream random data (Pressure, Temperature,
    ```
 2. Run the server:
    ```bash
-   python app.py
+   python server.py
    ```
 
 ## Endpoints:
